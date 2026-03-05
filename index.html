@@ -1,0 +1,282 @@
+# -
+ЗАКРЫВАЙ ФНАФ ШЛЁПА ОЧЕНЬ СЛОЖНЫЙ🐈🐈🐈🐈🐈🐈🐈🐈🐈🐈🐈🐈
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>FNAF Шлёпа</title>
+
+<style>
+body{background:black;color:white;text-align:center;font-family:sans-serif}
+
+#game{
+width:700px;
+height:400px;
+margin:auto;
+background:#222;
+position:relative;
+border:3px solid white;
+}
+
+#player{position:absolute;bottom:20px;left:320px;width:60px;height:60px;background:blue;}
+
+#shlepa{
+position:absolute;
+top:0;
+left:320px;
+width:60px;
+height:60px;
+background-image:url("https://avatars.mds.yandex.net/i?id=04bde35dcc850f7b0005ebea974dffcf_l-10641465-images-thumbs&n=13");
+background-size:cover;
+}
+
+.door{
+position:absolute;
+top:0;
+width:60px;
+height:400px;
+background:black;
+border:2px solid white;
+}
+
+#doorL{left:0}
+#doorR{right:0}
+
+#shaft{
+position:absolute;
+bottom:0;
+left:300px;
+width:100px;
+height:50px;
+border:2px solid white;
+background:black;
+}
+
+#ui{margin-top:10px}
+
+button{padding:8px;margin:3px}
+
+#death{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:red;
+color:white;
+font-size:40px;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+}
+
+#time{
+position:absolute;
+top:5px;
+right:10px;
+font-size:20px;
+}
+
+#level{
+position:absolute;
+top:5px;
+left:10px;
+font-size:20px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>FNAF ШЛЁПА</h2>
+
+<select id="difficulty">
+<option value="1">1 Легко</option>
+<option value="2">2 Норм</option>
+<option value="3">3 Норм+</option>
+<option value="4">4 Сложно</option>
+<option value="5">5 Кошмар</option>
+</select>
+
+<button onclick="startGame()">Начать</button>
+<button onclick="playShlepa()">Играть за Шлёпу</button>
+
+<div id="game">
+
+<div id="time">12 AM</div>
+<div id="level">Ночь</div>
+
+<div id="player"></div>
+<div id="shlepa"></div>
+
+<div id="doorL" class="door"></div>
+<div id="doorR" class="door"></div>
+
+<div id="shaft"></div>
+
+</div>
+
+<div id="ui">
+<button onclick="toggleDoor('L')">Левая дверь</button>
+<button onclick="toggleDoor('R')">Правая дверь</button>
+<button onclick="toggleShaft()">Шахта</button>
+</div>
+
+<div id="death">
+<div>ВЫ УМЕРЛИ ОТ ШЛЁПА</div>
+<button onclick="restart()">Начать заново</button>
+</div>
+
+<script>
+
+let shlepa=document.getElementById("shlepa")
+let player=document.getElementById("player")
+
+let doorL=false
+let doorR=false
+let shaft=false
+
+let gameOver=false
+let playAsShlepa=false
+
+let time=12
+let speed=1
+
+function startGame(){
+
+let diff=document.getElementById("difficulty").value
+
+speed=0.5+diff*0.6
+
+gameOver=false
+playAsShlepa=false
+
+moveShlepa()
+timeLoop()
+
+}
+
+function playShlepa(){
+
+playAsShlepa=true
+
+document.addEventListener("keydown",e=>{
+
+let x=shlepa.offsetLeft
+let y=shlepa.offsetTop
+
+if(e.key=="a")x-=10
+if(e.key=="d")x+=10
+if(e.key=="w")y-=10
+if(e.key=="s")y+=10
+
+shlepa.style.left=x+"px"
+shlepa.style.top=y+"px"
+
+checkKill()
+
+})
+
+}
+
+function moveShlepa(){
+
+if(gameOver||playAsShlepa)return
+
+let x=shlepa.offsetLeft
+let y=shlepa.offsetTop
+
+let px=player.offsetLeft
+let py=player.offsetTop
+
+let dx=px-x
+let dy=py-y
+
+let dist=Math.sqrt(dx*dx+dy*dy)
+
+if(dist>5){
+
+x+=dx/dist*speed
+y+=dy/dist*speed
+
+shlepa.style.left=x+"px"
+shlepa.style.top=y+"px"
+
+}
+
+checkKill()
+
+requestAnimationFrame(moveShlepa)
+
+}
+
+function checkKill(){
+
+let dx=shlepa.offsetLeft-player.offsetLeft
+let dy=shlepa.offsetTop-player.offsetTop
+
+if(Math.abs(dx)<50 && Math.abs(dy)<50){
+
+setTimeout(()=>{
+
+if(!gameOver){
+gameOver=true
+document.getElementById("death").style.display="flex"
+}
+
+},2000)
+
+}
+
+}
+
+function toggleDoor(side){
+
+if(side=="L"){
+doorL=!doorL
+document.getElementById("doorL").style.background=doorL?"white":"black"
+}
+
+if(side=="R"){
+doorR=!doorR
+document.getElementById("doorR").style.background=doorR?"white":"black"
+}
+
+}
+
+function toggleShaft(){
+
+shaft=!shaft
+document.getElementById("shaft").style.background=shaft?"white":"black"
+
+}
+
+function timeLoop(){
+
+let timer=setInterval(()=>{
+
+if(gameOver){clearInterval(timer);return}
+
+time++
+
+if(time>6){
+alert("6 AM! Вы выиграли!")
+clearInterval(timer)
+return
+}
+
+document.getElementById("time").innerText=time+" AM"
+
+},15000)
+
+}
+
+function restart(){
+location.reload()
+}
+
+</script>
+
+</body>
+</html>
