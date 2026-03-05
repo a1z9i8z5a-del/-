@@ -1,31 +1,22 @@
 # -
 ЗАКРЫВАЙ ФНАФ ШЛЁПА ОЧЕНЬ СЛОЖНЫЙ🐈🐈🐈🐈🐈🐈🐈🐈🐈🐈🐈🐈
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>FNAF Шлёпа</title>
+<title>FNAF Shlepa</title>
 
 <style>
 body{background:black;color:white;text-align:center;font-family:sans-serif}
 
-#game{
-width:700px;
-height:400px;
-margin:auto;
-background:#222;
-position:relative;
-border:3px solid white;
-}
-
-#player{position:absolute;bottom:20px;left:320px;width:60px;height:60px;background:blue;}
+#game{width:700px;height:400px;background:#222;margin:auto;position:relative;border:3px solid white}
 
 #shlepa{
 position:absolute;
-top:0;
-left:320px;
 width:60px;
 height:60px;
+top:0;
+left:320px;
 background-image:url("https://avatars.mds.yandex.net/i?id=04bde35dcc850f7b0005ebea974dffcf_l-10641465-images-thumbs&n=13");
 background-size:cover;
 }
@@ -47,14 +38,10 @@ position:absolute;
 bottom:0;
 left:300px;
 width:100px;
-height:50px;
+height:60px;
 border:2px solid white;
 background:black;
 }
-
-#ui{margin-top:10px}
-
-button{padding:8px;margin:3px}
 
 #death{
 display:none;
@@ -70,44 +57,24 @@ justify-content:center;
 align-items:center;
 flex-direction:column;
 }
-
-#time{
-position:absolute;
-top:5px;
-right:10px;
-font-size:20px;
-}
-
-#level{
-position:absolute;
-top:5px;
-left:10px;
-font-size:20px;
-}
 </style>
 </head>
 
 <body>
 
-<h2>FNAF ШЛЁПА</h2>
+<h2 id="title">FNAF ШЛЁПА</h2>
 
-<select id="difficulty">
-<option value="1">1 Легко</option>
-<option value="2">2 Норм</option>
-<option value="3">3 Норм+</option>
-<option value="4">4 Сложно</option>
-<option value="5">5 Кошмар</option>
+<select id="lang" onchange="setLang()">
+<option value="ru">Русский</option>
+<option value="en">English</option>
 </select>
 
-<button onclick="startGame()">Начать</button>
-<button onclick="playShlepa()">Играть за Шлёпу</button>
+<br><br>
+
+<button onclick="startGame()" id="startBtn">Начать</button>
 
 <div id="game">
 
-<div id="time">12 AM</div>
-<div id="level">Ночь</div>
-
-<div id="player"></div>
 <div id="shlepa"></div>
 
 <div id="doorL" class="door"></div>
@@ -117,117 +84,115 @@ font-size:20px;
 
 </div>
 
-<div id="ui">
-<button onclick="toggleDoor('L')">Левая дверь</button>
-<button onclick="toggleDoor('R')">Правая дверь</button>
-<button onclick="toggleShaft()">Шахта</button>
-</div>
+<br>
+
+<button onclick="toggleDoor('L')" id="leftBtn">Левая дверь</button>
+<button onclick="toggleDoor('R')" id="rightBtn">Правая дверь</button>
+<button onclick="toggleShaft()" id="shaftBtn">Шахта</button>
 
 <div id="death">
-<div>ВЫ УМЕРЛИ ОТ ШЛЁПА</div>
-<button onclick="restart()">Начать заново</button>
+<div id="deathText">ВЫ УМЕРЛИ ОТ ШЛЁПА</div>
+<button onclick="restart()" id="restartBtn">Начать заново</button>
 </div>
 
 <script>
 
 let shlepa=document.getElementById("shlepa")
-let player=document.getElementById("player")
 
 let doorL=false
 let doorR=false
 let shaft=false
 
-let gameOver=false
-let playAsShlepa=false
-
-let time=12
-let speed=1
+let target=""
 
 function startGame(){
 
-let diff=document.getElementById("difficulty").value
+moveLoop()
 
-speed=0.5+diff*0.6
-
-gameOver=false
-playAsShlepa=false
-
-moveShlepa()
-timeLoop()
+setInterval(()=>{
+choosePath()
+},4000)
 
 }
 
-function playShlepa(){
+function choosePath(){
 
-playAsShlepa=true
+let r=Math.floor(Math.random()*3)
 
-document.addEventListener("keydown",e=>{
+if(r==0)target="left"
+if(r==1)target="right"
+if(r==2)target="shaft"
+
+}
+
+function moveLoop(){
 
 let x=shlepa.offsetLeft
 let y=shlepa.offsetTop
 
-if(e.key=="a")x-=10
-if(e.key=="d")x+=10
-if(e.key=="w")y-=10
-if(e.key=="s")y+=10
+if(target=="left"){
+x-=2
+}
+
+if(target=="right"){
+x+=2
+}
+
+if(target=="shaft"){
+y+=2
+}
 
 shlepa.style.left=x+"px"
 shlepa.style.top=y+"px"
 
-checkKill()
+checkAttack()
 
-})
+requestAnimationFrame(moveLoop)
 
 }
 
-function moveShlepa(){
-
-if(gameOver||playAsShlepa)return
+function checkAttack(){
 
 let x=shlepa.offsetLeft
 let y=shlepa.offsetTop
 
-let px=player.offsetLeft
-let py=player.offsetTop
+if(target=="left" && x<80){
 
-let dx=px-x
-let dy=py-y
-
-let dist=Math.sqrt(dx*dx+dy*dy)
-
-if(dist>5){
-
-x+=dx/dist*speed
-y+=dy/dist*speed
-
-shlepa.style.left=x+"px"
-shlepa.style.top=y+"px"
+if(!doorL) kill()
+else resetShlepa()
 
 }
 
-checkKill()
+if(target=="right" && x>560){
 
-requestAnimationFrame(moveShlepa)
+if(!doorR) kill()
+else resetShlepa()
 
 }
 
-function checkKill(){
+if(target=="shaft" && y>330){
 
-let dx=shlepa.offsetLeft-player.offsetLeft
-let dy=shlepa.offsetTop-player.offsetTop
+if(!shaft) kill()
+else resetShlepa()
 
-if(Math.abs(dx)<50 && Math.abs(dy)<50){
+}
+
+}
+
+function resetShlepa(){
+
+shlepa.style.left="320px"
+shlepa.style.top="0px"
+
+}
+
+function kill(){
 
 setTimeout(()=>{
 
-if(!gameOver){
-gameOver=true
 document.getElementById("death").style.display="flex"
-}
 
 },2000)
-
-}
 
 }
 
@@ -252,28 +217,34 @@ document.getElementById("shaft").style.background=shaft?"white":"black"
 
 }
 
-function timeLoop(){
-
-let timer=setInterval(()=>{
-
-if(gameOver){clearInterval(timer);return}
-
-time++
-
-if(time>6){
-alert("6 AM! Вы выиграли!")
-clearInterval(timer)
-return
-}
-
-document.getElementById("time").innerText=time+" AM"
-
-},15000)
-
-}
-
 function restart(){
 location.reload()
+}
+
+function setLang(){
+
+let l=document.getElementById("lang").value
+
+if(l=="ru"){
+title.innerText="FNAF ШЛЁПА"
+startBtn.innerText="Начать"
+leftBtn.innerText="Левая дверь"
+rightBtn.innerText="Правая дверь"
+shaftBtn.innerText="Шахта"
+deathText.innerText="ВЫ УМЕРЛИ ОТ ШЛЁПА"
+restartBtn.innerText="Начать заново"
+}
+
+if(l=="en"){
+title.innerText="FNAF SHLEPA"
+startBtn.innerText="Start"
+leftBtn.innerText="Left door"
+rightBtn.innerText="Right door"
+shaftBtn.innerText="Vent"
+deathText.innerText="YOU DIED FROM SHLEPA"
+restartBtn.innerText="Restart"
+}
+
 }
 
 </script>
